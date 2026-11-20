@@ -1,0 +1,17 @@
+[project]
+name = "group4-portfolio-tracker"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "Christian Da Silva De Goes", email = "234804319+christiandsdg@users.noreply.github.com" }
+]
+requires-python = ">=3.14"
+dependencies = []
+
+[project.scripts]
+group4-portfolio-tracker = "group4_portfolio_tracker:main"
+
+[build-system]
+requires = ["uv_build>=0.12.19,<0.13.0"]
+build-backend = "uv_build"
