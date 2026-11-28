@@ -23,14 +23,14 @@ Every module links its data to a traveler, so travelers are the app's user manag
 
 Each module has its own package, API router (under `/api/<module>`) and Streamlit page, with one main entity stored in the database and one calculated result.
 
-| # | Module | Owner | Route | Main entity                                                                       | Calculated result |
-|---|--------|-------|-------|-----------------------------------------------------------------------------------|-------------------|
-| 1 | Travelers | Vince | `/api/travelers` | Traveler (name, email)                                                            | Total paid by each traveler |
-| 2 | Trips | Jesus | `/api/trips` | Trip (name, destination, start and end date), plus which travelers are on it      | Trip length and days until departure |
-| 3 | Bookings | Maria | `/api/bookings` | Booking (trip, type, description, cost)                                           | Total booked cost per trip |
-| 4 | Expenses & settle-up | Christian | `/api/expenses` | Expense (trip, paid by, amount, date), split equally between the trip's travelers | Net balance per traveler and who owes whom |
-| 5 | Currency | Nargiz | `/api/currency` | Exchange rate (from currency, to currency, rate)                                  | An amount converted to another currency |
-| 6 | Budget | Ben | `/api/budgets` | Budget (trip, limit_amount)                                                       | Budget left = limit − bookings − expenses |
+| # | Module | Owner | Route | Main entity                                                                                   | Calculated result |
+|---|--------|-------|-------|-----------------------------------------------------------------------------------------------|-------------------|
+| 1 | Travelers | Vince | `/api/travelers` | Traveler (name, email)                                                                        | Total paid by each traveler |
+| 2 | Trips | Jesus | `/api/trips` | Trip (name, destination, start and end date), plus which travelers are on it                  | Trip length and days until departure |
+| 3 | Bookings | Maria | `/api/bookings` | Booking (trip, type, description, cost)                                                       | Total booked cost per trip |
+| 4 | Expenses & settle-up | Christian | `/api/expenses` | Expense (trip, paid_by_traveler_id, amount, date), split equally between the trip's travelers | Net balance per traveler and who owes whom |
+| 5 | Currency | Nargiz | `/api/currency` | Exchange rate (from currency, to currency, rate)                                              | An amount converted to another currency |
+| 6 | Budget | Ben | `/api/budgets` | Budget (trip, limit_amount)                                                                   | Budget left = limit − bookings − expenses |
 
 ### Cross-module feature
 
@@ -49,7 +49,7 @@ A **trip dashboard** that combines the modules on one page: the trip's travelers
 
 ## Conventions
 
-**Stack:** the tech stack in the Concept section above, built with these tools: Python 3.14 with uv, SQLAlchemy for the database (SQLite during development, PostgreSQL in Docker Compose later), Ruff for linting and formatting, pytest for tests.
+**Stack:** the tech stack in the Concept section above, built with these tools: Python 3.14 with uv, FastAPI with Pydantic for the request and response models, SQLAlchemy for the database (PostgreSQL, run locally with Docker Compose and on Azure later), Streamlit for the frontend, Ruff for linting and formatting, pytest for tests.
 
 **Package names:** all code lives in `src/group4_trip_planner/`. Each module has its own package with the same files:
 
@@ -67,7 +67,9 @@ The module packages are `travelers`, `trips`, `bookings`, `expenses`, `currency`
 
 **API routes:** each module has its own FastAPI router under `/api/<module>/`, with the route in the Modules table above (for example `/api/budgets/`). `POST /api/<module>/` creates an item, `GET /api/<module>/` lists them. Request and response bodies are JSON.
 
-**Money:** `Decimal` in Python and in the API, stored as whole cents (an integer) in the database with the shared `Money` column type from `db.py`. Never a `float`.
+**Money:** `Decimal` in Python, sent and returned in the API as a decimal string ("12.50"), stored as whole cents (an integer) in the database with the shared `Money` column type from `db.py`. Never a `float`.
+
+**Currency:** all amounts are stored in EUR. An amount entered in another currency is converted to EUR with the Currency module before it is saved. Exchange rates are not money: they are `Decimal` in Python and `Numeric(12, 6)` in the database (six decimal places), not the `Money` type.
 
 **Dates:** `datetime.date` in Python, sent and returned as `YYYY-MM-DD` in the API.
 
@@ -75,7 +77,7 @@ The module packages are `travelers`, `trips`, `bookings`, `expenses`, `currency`
 
 ## Git rules
 
-1. **Nobody pushes to `main`.** It is protected: a change reaches `main` only through a pull request with one approval.
+1. **Nobody pushes to `main`.** It is protected: a change reaches `main` only through a pull request with one approval and, once CI is set up, passing checks.
 2. **One branch per task**, created from an up-to-date `main` and named `feature/...`, `fix/...` or `docs/...` (for example `feature/budgets-api`).
 3. **Small pull requests**, reviewed and approved by one teammate, merged with a merge commit within a day or two. The description says what changes and links the issue (`Closes #<issue>`).
 4. **Bring `main` into your branch often** (`git pull origin main`) and resolve conflicts on your branch, before merging.
@@ -84,8 +86,11 @@ The module packages are `travelers`, `trips`, `bookings`, `expenses`, `currency`
 ## Running the API
 
 ```bash
+cp .env.example .env
+docker compose up -d db
 uv sync
 uv run fastapi dev src/group4_trip_planner/main.py
 ```
+**Docker must be running.** `docker compose up -d db` starts the PostgreSQL database in the background; `docker compose down` stops it.
 
 Open the address the terminal prints (normally http://127.0.0.1:8000). The interactive documentation, where every endpoint can be tried, is at http://127.0.0.1:8000/docs.
