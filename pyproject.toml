@@ -1,7 +1,7 @@
 [project]
-name = "group4-portfolio-tracker"
+name = "group4-trip-planner"
 version = "0.1.0"
-description = "Add your description here"
+description = "Trip Planner: a web app for planning a group trip and managing its money: travelers, trips, bookings, shared expenses, currency conversion and budgets."
 readme = "README.md"
 authors = [
     { name = "Christian Da Silva De Goes", email = "234804319+christiandsdg@users.noreply.github.com" }
@@ -10,7 +10,7 @@ requires-python = ">=3.14"
 dependencies = []
 
 [project.scripts]
-group4-portfolio-tracker = "group4_portfolio_tracker:main"
+group4-trip-planner = "group4-trip-planner:main"
 
 [build-system]
 requires = ["uv_build>=0.12.19,<0.13.0"]
