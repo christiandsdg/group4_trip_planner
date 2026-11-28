@@ -89,7 +89,7 @@ The module packages are `travelers`, `trips`, `bookings`, `expenses`, `currency`
 cp .env.example .env
 docker compose up -d db
 uv sync
-uv run fastapi dev src/group4_trip_planner/main.py
+uv run --env-file .env fastapi dev src/group4_trip_planner/main.py
 ```
 **Docker must be running.** `docker compose up -d db` starts the PostgreSQL database in the background; `docker compose down` stops it.
 
